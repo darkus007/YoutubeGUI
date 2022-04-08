@@ -1,6 +1,8 @@
+import os
 import sys
-from PySide2.QtWidgets import QApplication, QMainWindow, QPushButton
-from PySide2 import QtCore, QtWidgets
+import platform
+from PySide2.QtWidgets import QApplication, QMainWindow
+from PySide2 import QtCore
 from main_window import Ui_MainWindow
 from youtube import MyYouTuBe
 
@@ -39,7 +41,7 @@ class ThreadClass(QtCore.QThread, MyYouTuBe):
         self.progress_bar_value = 0
 
     def run(self) -> None:
-        print(f'Start thread {self.index}')
+        self.parent.ui.button_get.setEnabled(False)
 
         url = window.ui.line_edit_url.text()
         super(MyYouTuBe, self).__init__(url=url)
@@ -50,11 +52,12 @@ class ThreadClass(QtCore.QThread, MyYouTuBe):
         self.parent.ui.text_browser.append('Size:\t{:= 3d} bytes'.format(self.best_video_size))
         self.file_size = self.best_video_size
         self.download_best_video()
+        self.parent.ui.button_get.setEnabled(True)
 
     def stop(self):
         self.is_running = False
-        print(f'Stop thread {self.index}')
         self.terminate()
+        self.parent.ui.button_get.setEnabled(True)
 
     def on_progress(self, stream, chunk, bytes_remaining):
         percent = (self.file_size - bytes_remaining) / self.file_size
@@ -65,8 +68,15 @@ class ThreadClass(QtCore.QThread, MyYouTuBe):
         # print(f'Downloaded: {percent:.0%}', end='\r')
 
     def on_complete(self, stream, path: str):
-        self.parent.ui.text_browser.append("\nFile saved as:\n" + path)
-        # print('Done')
+        self.parent.ui.text_browser.append("File saved as:\n" + path)
+
+        # CheckBox "Open folder after download"
+        if self.parent.ui.check_box_open_folder.isChecked():
+            current_system = platform.system().lower()
+            if current_system in ('linux', 'darwin'):
+                os.system(f'open {os.path.curdir}/video')   # macos/linux
+            elif current_system == 'windows':
+                os.system(f'start {os.path.curdir}/video')  # windows
 
 
 if __name__ == '__main__':
