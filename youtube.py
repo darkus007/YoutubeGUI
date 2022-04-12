@@ -120,7 +120,7 @@ class MyYouTuBe(YouTube):
 
 
 class MyPlayList(Playlist):
-    """ YouTube video or audio downloader by playlist URL """
+    """ Download a YouTube playlist with URL """
     def __init__(self, url):
         super(MyPlayList, self).__init__(url=url)
         self.symbols_to_remove = '\~@#$%^-_(){}+=[]:;«,./?*<>|'     # unwanted characters for folder name
@@ -151,8 +151,7 @@ class MyPlayList(Playlist):
                     count += 1
                     break
                 except Exception as e:
-                    print(e, end='')
-                    print('. Try again...')
+                    print('f{e}. Try again...')
 
 
 def main():
@@ -163,7 +162,7 @@ def main():
             choice = int(input("1 - to download the best video or audio; 2 - select boot options; "
                                "3 - to download video or audio by playlist URL; 0 - to exit. "))
             if choice not in (0, 1, 2, 3):
-                print(f'Number is out of range (0 - 2)')
+                print(f'Number is out of range (0 - 3)')
         except ValueError:
             print('Wrong value!')
 
@@ -190,7 +189,7 @@ def main():
 
     # 1 - download the best video
     if choice == 1:
-        print(f'Best video size {video.best_video_size} bytes')
+        print(f'Best video size {video.best_video_size: _} bytes')
         video.download_best_video()
         exit()
 
