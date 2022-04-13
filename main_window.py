@@ -47,18 +47,6 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout)
 
-        self.verticalLayout_2 = QVBoxLayout()
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.verticalLayout_2.setSizeConstraint(QLayout.SetMinimumSize)
-        self.verticalLayout_2.setContentsMargins(10, -1, 10, -1)
-        self.check_box_list = QCheckBox(self.centralwidget)
-        self.check_box_list.setObjectName(u"check_box_list")
-
-        self.verticalLayout_2.addWidget(self.check_box_list)
-
-
-        self.verticalLayout.addLayout(self.verticalLayout_2)
-
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.horizontalLayout_2.setSizeConstraint(QLayout.SetMinimumSize)
@@ -86,6 +74,11 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
         self.horizontalLayout_3.setSizeConstraint(QLayout.SetMinimumSize)
         self.horizontalLayout_3.setContentsMargins(10, -1, 10, -1)
+        self.label_2 = QLabel(self.centralwidget)
+        self.label_2.setObjectName(u"label_2")
+
+        self.horizontalLayout_3.addWidget(self.label_2)
+
         self.progress_bar = QProgressBar(self.centralwidget)
         self.progress_bar.setObjectName(u"progress_bar")
         self.progress_bar.setValue(0)
@@ -113,7 +106,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"URL:", None))
         self.button_get.setText(QCoreApplication.translate("MainWindow", u"Get", None))
-        self.check_box_list.setText(QCoreApplication.translate("MainWindow", u"Download playlist", None))
         self.check_box_open_folder.setText(QCoreApplication.translate("MainWindow", u"Open folder after download", None))
+        self.label_2.setText(QCoreApplication.translate("MainWindow", u"Downloading:", None))
     # retranslateUi
 

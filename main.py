@@ -13,14 +13,14 @@ class MyWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.ui.button_get.clicked.connect(self.button_click)
-        self.thread = {}
+        self.thread = None
 
     def button_click(self):
         self.ui.text_browser.clear()
-        self.thread[1] = ThreadClass(self, index=1)
+        self.thread = ThreadClass(self, index=1)
         self.ui.progress_bar.setValue(0)
-        self.thread[1].start()
-        self.thread[1].progress_bar_signal.connect(self.progress_bar_update)
+        self.thread.start()
+        self.thread.progress_bar_signal.connect(self.progress_bar_update)
 
     def progress_bar_update(self, value):
         self.ui.progress_bar.setValue(value)
@@ -35,7 +35,7 @@ class ThreadClass(QtCore.QThread, MyYouTuBe):
 
     def __init__(self, parent=None, index=0):
         super(ThreadClass, self).__init__(parent)
-        self.index = index
+        self.index = index                          # for several threads
         self.is_running = True
         self.parent = parent
         self.file_size = 0
@@ -51,7 +51,7 @@ class ThreadClass(QtCore.QThread, MyYouTuBe):
         # trying to download a playlist
         try:
             play_list = MyPlayList(url)
-            folder = play_list.title        # rise KeyError if the url does not contain a playlist
+            folder = play_list.title        # rise except KeyError if the url does not contain a playlist
             try:
                 os.mkdir('video/' + folder)
             except Exception as ex:
@@ -59,6 +59,7 @@ class ThreadClass(QtCore.QThread, MyYouTuBe):
 
             count = 1
             max_count = len(play_list)
+            self.parent.append_text_browser_message(f'Total [{max_count}] videos.\n')
 
             for url in play_list.video_urls:
                 i = 0
@@ -66,14 +67,7 @@ class ThreadClass(QtCore.QThread, MyYouTuBe):
                     i += 1
                     try:
                         self.parent.append_text_browser_message(f'[{count}|{max_count}]')
-                        super(MyYouTuBe, self).__init__(url=url)
-                        self.register_on_complete_callback(self.on_complete)
-                        self.register_on_progress_callback(self.on_progress)
-                        self.parent.append_text_browser_message(f'Title:\t"{self.title}"\n'
-                                                                f'Author:\t"{self.author}"')
-                        self.parent.append_text_browser_message(f'Size:\t{self.best_video_size: ,} bytes')
-                        self.file_size = self.best_video_size
-                        self.download_best_video(path='video/' + folder)
+                        self.download_one_best_video(url=url, path='video/' + folder)
                         count += 1
                         break
                     except Exception as ex:
@@ -81,15 +75,9 @@ class ThreadClass(QtCore.QThread, MyYouTuBe):
 
         # else download one best video
         except KeyError:
+            del play_list
             try:
-                super(MyYouTuBe, self).__init__(url=url)
-                self.register_on_complete_callback(self.on_complete)
-                self.register_on_progress_callback(self.on_progress)
-                self.parent.append_text_browser_message(f'Title:\t"{self.title}"\n'
-                                                        f'Author:\t"{self.author}"')
-                self.parent.append_text_browser_message(f'Size:\t{self.best_video_size: ,} bytes')
-                self.file_size = self.best_video_size
-                self.download_best_video()
+                self.download_one_best_video(url=url, path='video/')
             except Exception as ex:              # PytubeError
                 self.parent.append_text_browser_message(f'ERROR:\t{ex}"')
 
@@ -101,13 +89,23 @@ class ThreadClass(QtCore.QThread, MyYouTuBe):
         self.terminate()
         self.parent.ui.button_get.setEnabled(True)
 
+    def download_one_best_video(self, url, path):
+        super(MyYouTuBe, self).__init__(url=url)
+        self.register_on_complete_callback(self.on_complete)
+        self.register_on_progress_callback(self.on_progress)
+        self.parent.append_text_browser_message(f'Title:\t"{self.title}"\n'
+                                                f'Author:\t"{self.author}"')
+        self.parent.append_text_browser_message(f'Size:\t{self.best_video_size: ,} bytes')
+        self.file_size = self.best_video_size
+        self.download_best_video(path)
+
     def on_progress(self, stream, chunk, bytes_remaining):
         percent = (self.file_size - bytes_remaining) / self.file_size
-        self.parent.append_text_browser_message(f'Downloaded:\t{int(percent * 100)} %')
+        # self.parent.append_text_browser_message(f'Downloaded:\t{int(percent * 100)} %')
         self.progress_bar_signal.emit(int(percent * 100))
 
     def on_complete(self, stream, path: str):
-        self.parent.append_text_browser_message("File saved as:\n" + path)
+        self.parent.append_text_browser_message("File saved as:\n" + path + "\n")
 
         # CheckBox "Open folder after download"
         if self.parent.ui.check_box_open_folder.isChecked():

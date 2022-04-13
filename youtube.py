@@ -150,8 +150,8 @@ class MyPlayList(Playlist):
                     MyYouTuBe(url).download_best_video(path='video/' + folder)
                     count += 1
                     break
-                except Exception as e:
-                    print('f{e}. Try again...')
+                except Exception as ex:
+                    print(f'{ex}. Try again...')
 
 
 def main():
